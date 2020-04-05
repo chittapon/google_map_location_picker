@@ -72,7 +72,7 @@ class SearchInputState extends State<SearchInput> {
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: <Widget>[
-          Icon(Icons.search),
+          Icon(Icons.search, color: Color(0xFFC7C7C7),),
           SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -93,7 +93,7 @@ class SearchInputState extends State<SearchInput> {
           SizedBox(width: 8),
           hasSearchEntry
               ? GestureDetector(
-                  child: Icon(Icons.clear),
+                  child: Icon(Icons.clear, color: Color(0xFFC7C7C7),),
                   onTap: () {
                     editController.clear();
                     setState(() {

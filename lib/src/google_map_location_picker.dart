@@ -33,7 +33,9 @@ class LocationPicker extends StatefulWidget {
     this.resultCardConfirmWidget,
     this.resultCardAlignment,
     this.resultCardDecoration,
-    this.resultCardPadding,
+    this.resultCardPadding, 
+        this.leadingWidget,
+        this.iconColor,
   });
 
   final String apiKey;
@@ -54,6 +56,8 @@ class LocationPicker extends StatefulWidget {
   final Alignment resultCardAlignment;
   final Decoration resultCardDecoration;
   final EdgeInsets resultCardPadding;
+  final Widget leadingWidget;
+  final Color iconColor;
 
   @override
   LocationPickerState createState() => LocationPickerState();
@@ -112,6 +116,7 @@ class LocationPickerState extends State<LocationPicker> {
         child: Material(
           elevation: 1,
           child: Container(
+            color: Colors.white,
             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             child: Row(
               children: <Widget>[
@@ -230,6 +235,7 @@ class LocationPickerState extends State<LocationPicker> {
         top: appBarBox.size.height,
         child: Material(
           elevation: 1,
+          color: Colors.white,
           child: Column(
             children: suggestions,
           ),
@@ -363,6 +369,7 @@ class LocationPickerState extends State<LocationPicker> {
           appBar: AppBar(
             iconTheme: Theme.of(context).iconTheme,
             elevation: 0,
+            leading: widget.leadingWidget,
             backgroundColor: widget.appBarColor,
             key: appBarKey,
             title: SearchInput(
@@ -387,6 +394,7 @@ class LocationPickerState extends State<LocationPicker> {
             resultCardDecoration: widget.resultCardDecoration,
             resultCardPadding: widget.resultCardPadding,
             key: mapKey,
+            iconColor: widget.iconColor,
           ),
         );
       }),
@@ -420,6 +428,8 @@ Future<LocationResult> showLocationPicker(
   AlignmentGeometry resultCardAlignment,
   EdgeInsetsGeometry resultCardPadding,
   Decoration resultCardDecoration,
+      Widget leadingWidget = null,
+      Color iconColor = null,
 }) async {
   final results = await Navigator.of(context).push(
     MaterialPageRoute<dynamic>(
@@ -439,6 +449,8 @@ Future<LocationResult> showLocationPicker(
           resultCardAlignment: resultCardAlignment,
           resultCardPadding: resultCardPadding,
           resultCardDecoration: resultCardDecoration,
+          leadingWidget: leadingWidget,
+          iconColor: iconColor,
         );
       },
     ),

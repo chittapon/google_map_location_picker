@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_map_location_picker/generated/i18n.dart'
     as location_picker;
 import 'package:google_map_location_picker/google_map_location_picker.dart';
-import 'package:google_map_location_picker_example/keys.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'generated/i18n.dart';
@@ -17,12 +16,21 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   LocationResult _pickedLocation;
+  String apiKey = "API_KEY";
+
+  final theme = ThemeData(
+    primarySwatch: Colors.blue,
+    scaffoldBackgroundColor: Colors.white,
+    bottomAppBarColor: Colors.blue,
+    canvasColor: Colors.transparent,
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
 //      theme: ThemeData.dark(),
       title: 'location picker',
+      theme: theme,
       localizationsDelegates: const [
         location_picker.S.delegate,
         S.delegate,

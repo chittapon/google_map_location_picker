@@ -35,6 +35,7 @@ class MapPicker extends StatefulWidget {
     this.resultCardAlignment,
     this.resultCardDecoration,
     this.resultCardPadding,
+        this.iconColor,
   }) : super(key: key);
 
   final String apiKey;
@@ -55,6 +56,7 @@ class MapPicker extends StatefulWidget {
   final Alignment resultCardAlignment;
   final Decoration resultCardDecoration;
   final EdgeInsets resultCardPadding;
+  final Color iconColor;
 
   @override
   MapPickerState createState() => MapPickerState();
@@ -185,6 +187,7 @@ class MapPickerState extends State<MapPicker> {
             layersButtonEnabled: widget.layersButtonEnabled,
             onToggleMapTypePressed: _onToggleMapTypePressed,
             onMyLocationPressed: _initCurrentLocation,
+            iconColor: widget.iconColor,
           ),
           pin(),
           locationCard(),
@@ -200,6 +203,7 @@ class MapPickerState extends State<MapPicker> {
         padding: widget.resultCardPadding ?? EdgeInsets.all(16.0),
         child: Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 4,
           child: Consumer<LocationProvider>(
               builder: (context, locationProvider, _) {
             return Padding(
@@ -237,7 +241,8 @@ class MapPickerState extends State<MapPicker> {
                             )
                           });
                         },
-                        child: Icon(Icons.arrow_forward),
+                        child: Icon(Icons.arrow_forward, color: Colors.white,),
+                        backgroundColor: widget.iconColor,
                       ),
                 ],
               ),
@@ -270,7 +275,7 @@ class MapPickerState extends State<MapPicker> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.place, size: 56),
+            Icon(Icons.place, size: 56, color: widget.iconColor,),
             Container(
               decoration: ShapeDecoration(
                 shadows: [
@@ -377,6 +382,7 @@ class _MapFabs extends StatelessWidget {
     @required this.layersButtonEnabled,
     @required this.onToggleMapTypePressed,
     @required this.onMyLocationPressed,
+    this.iconColor,
   })  : assert(onToggleMapTypePressed != null),
         super(key: key);
 
@@ -385,6 +391,7 @@ class _MapFabs extends StatelessWidget {
 
   final VoidCallback onToggleMapTypePressed;
   final VoidCallback onMyLocationPressed;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -398,16 +405,19 @@ class _MapFabs extends StatelessWidget {
               onPressed: onToggleMapTypePressed,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               mini: true,
-              child: const Icon(Icons.layers),
+              child: Icon(Icons.layers, color: iconColor),
               heroTag: "layers",
+              backgroundColor: Colors.white,
             ),
           if (myLocationButtonEnabled)
             FloatingActionButton(
               onPressed: onMyLocationPressed,
               materialTapTargetSize: MaterialTapTargetSize.padded,
               mini: true,
-              child: const Icon(Icons.my_location),
+              child: Icon(Icons.my_location, color: iconColor),
               heroTag: "myLocation",
+              elevation: 2,
+              backgroundColor: Colors.white,
             ),
         ],
       ),
