@@ -152,9 +152,11 @@ class LocationPickerState extends State<LocationPicker> {
             "key=${widget.apiKey}&" +
             "input={$place}&sessiontoken=$sessionToken";
 
-    if (locationResult != null) {
-      endpoint += "&location=${locationResult.latLng.latitude}," +
-          "${locationResult.latLng.longitude}";
+    if (widget.initialCenter != null) {
+      endpoint += "&location=${widget.initialCenter.latitude}," +
+          "${widget.initialCenter.longitude}";
+
+      endpoint += "&radius=70000";
     }
     LocationUtils.getAppHeaders()
         .then((headers) => http.get(endpoint, headers: headers))
