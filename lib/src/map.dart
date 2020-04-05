@@ -14,6 +14,7 @@ import 'package:google_map_location_picker/src/utils/log.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:google_maps_webservice/places.dart';
 
 import 'model/location_result.dart';
 import 'utils/location_utils.dart';
@@ -73,7 +74,7 @@ class MapPickerState extends State<MapPicker> {
 
   Position _currentPosition;
 
-  String _address;
+  PlaceDetails _placeDetails;
 
   void _onToggleMapTypePressed() {
     final MapType nextType =
@@ -213,7 +214,7 @@ class MapPickerState extends State<MapPicker> {
                 children: <Widget>[
                   Flexible(
                     flex: 20,
-                    child: FutureLoadingBuilder<String>(
+                    child: FutureLoadingBuilder<PlaceDetails>(
                         future: getAddress(locationProvider.lastIdleLocation),
                         mutable: true,
                         loadingIndicator: Row(
@@ -222,10 +223,10 @@ class MapPickerState extends State<MapPicker> {
                             CircularProgressIndicator(),
                           ],
                         ),
-                        builder: (context, address) {
-                          _address = address;
+                        builder: (context, placeDetails) {
+                          _placeDetails = placeDetails;
                           return Text(
-                            address ?? 'Unnamed place',
+                            placeDetails?.formattedAddress ?? 'Unnamed place',
                             style: TextStyle(fontSize: 18),
                           );
                         }),
@@ -234,12 +235,7 @@ class MapPickerState extends State<MapPicker> {
                   widget.resultCardConfirmWidget ??
                       FloatingActionButton(
                         onPressed: () {
-                          Navigator.of(context).pop({
-                            'location': LocationResult(
-                              latLng: locationProvider.lastIdleLocation,
-                              address: _address,
-                            )
-                          });
+                          Navigator.of(context).pop(_placeDetails);
                         },
                         child: Icon(Icons.arrow_forward, color: Colors.white,),
                         backgroundColor: widget.iconColor,
@@ -253,7 +249,7 @@ class MapPickerState extends State<MapPicker> {
     );
   }
 
-  Future<String> getAddress(LatLng location) async {
+  Future<PlaceDetails> getAddress(LatLng location) async {
     try {
       var endPoint =
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=${location?.latitude},${location?.longitude}&key=${widget.apiKey}';
@@ -261,7 +257,10 @@ class MapPickerState extends State<MapPicker> {
               headers: await LocationUtils.getAppHeaders()))
           .body);
 
-      return response['results'][0]['formatted_address'];
+      PlaceDetails detail = PlaceDetails.fromJson(response['results'][0]);
+
+      return detail;
+
     } catch (e) {
       print(e);
     }

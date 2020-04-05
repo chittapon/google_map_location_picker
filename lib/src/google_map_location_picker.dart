@@ -11,6 +11,7 @@ import 'package:google_map_location_picker/src/utils/uuid.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:google_maps_webservice/places.dart';
 
 import 'model/auto_comp_iete_item.dart';
 import 'model/location_result.dart';
@@ -65,12 +66,15 @@ class LocationPicker extends StatefulWidget {
 
 class LocationPickerState extends State<LocationPicker> {
   /// Result returned after user completes selection
-  LocationResult locationResult;
+//  LocationResult locationResult;
 
   /// Overlay to display autocomplete suggestions
   OverlayEntry overlayEntry;
 
   List<NearbyPlace> nearbyPlaces = List();
+
+  /// Result returned after user completes selection
+  PlaceDetails placeDetails;
 
   /// Session token required for autocomplete API call
   String sessionToken = Uuid().generateV4();
@@ -222,6 +226,9 @@ class LocationPickerState extends State<LocationPicker> {
     });
   }
 
+  PlacesDetailsResponse _decodeDetailsResponse(http.Response res) =>
+      PlacesDetailsResponse.fromJson(json.decode(res.body));
+
   /// Display autocomplete suggestions with the overlay.
   void displayAutoCompleteSuggestions(List<RichSuggestion> suggestions) {
     final RenderBox renderBox = context.findRenderObject();
@@ -327,9 +334,7 @@ class LocationPickerState extends State<LocationPicker> {
 //          responseJson['results'][0]['address_components'][1]['short_name'];
 
       setState(() {
-        locationResult = LocationResult();
-        locationResult.address = road;
-        locationResult.latLng = latLng;
+        placeDetails = PlaceDetails.fromJson(responseJson['results'][0]);
       });
     }
   }
@@ -414,7 +419,7 @@ class LocationPickerState extends State<LocationPicker> {
 /// set [automaticallyAnimateToCurrentLocation] to false.
 ///
 ///
-Future<LocationResult> showLocationPicker(
+Future<PlaceDetails> showLocationPicker(
   BuildContext context,
   String apiKey, {
   LatLng initialCenter = const LatLng(45.521563, -122.677433),
@@ -458,9 +463,6 @@ Future<LocationResult> showLocationPicker(
     ),
   );
 
-  if (results != null && results.containsKey('location')) {
-    return results['location'];
-  } else {
-    return null;
-  }
+  return results;
+
 }
