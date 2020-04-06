@@ -75,12 +75,24 @@ class MapPickerState extends State<MapPicker> {
   Position _currentPosition;
 
   PlaceDetails _placeDetails;
+  
+  PlacesDetailsResponse _placesDetailsResponse;
+
+  bool isSelectFromSuggest = false;
+
+  String _address;
 
   void _onToggleMapTypePressed() {
     final MapType nextType =
         MapType.values[(_currentMapType.index + 1) % MapType.values.length];
 
     setState(() => _currentMapType = nextType);
+  }
+  
+  selectSuggest(String address, PlacesDetailsResponse placesDetailsResponse){
+    isSelectFromSuggest = true;
+    _address = address;
+    _placesDetailsResponse = placesDetailsResponse;
   }
 
   // this also checks for location permission.
@@ -171,8 +183,14 @@ class MapPickerState extends State<MapPicker> {
             },
             onCameraIdle: () async {
               print("onCameraIdle#_lastMapPosition = $_lastMapPosition");
-              LocationProvider.of(context, listen: false)
-                  .setLastIdleLocation(_lastMapPosition);
+
+              if (isSelectFromSuggest){
+                isSelectFromSuggest = false;
+              }else {
+                LocationProvider.of(context, listen: false)
+                    .setLastIdleLocation(_lastMapPosition);
+              }
+
             },
             onCameraMoveStarted: () {
               print("onCameraMoveStarted#_lastMapPosition = $_lastMapPosition");
@@ -214,7 +232,7 @@ class MapPickerState extends State<MapPicker> {
                 children: <Widget>[
                   Flexible(
                     flex: 20,
-                    child: FutureLoadingBuilder<PlaceDetails>(
+                    child: FutureLoadingBuilder<String>(
                         future: getAddress(locationProvider.lastIdleLocation),
                         mutable: true,
                         loadingIndicator: Row(
@@ -223,10 +241,9 @@ class MapPickerState extends State<MapPicker> {
                             CircularProgressIndicator(),
                           ],
                         ),
-                        builder: (context, placeDetails) {
-                          _placeDetails = placeDetails;
+                        builder: (context, address) {
                           return Text(
-                            placeDetails?.formattedAddress ?? 'Unnamed place',
+                            address ?? 'Unnamed place',
                             style: TextStyle(fontSize: 18),
                           );
                         }),
@@ -235,7 +252,8 @@ class MapPickerState extends State<MapPicker> {
                   widget.resultCardConfirmWidget ??
                       FloatingActionButton(
                         onPressed: () {
-                          Navigator.of(context).pop(_placeDetails);
+                          Map<String,dynamic> data = {"PlacesDetailsResponse": _placesDetailsResponse, "PlaceDetails": _placeDetails};
+                          Navigator.of(context).pop(data);
                         },
                         child: Icon(Icons.arrow_forward, color: Colors.white,),
                         backgroundColor: widget.iconColor,
@@ -249,8 +267,13 @@ class MapPickerState extends State<MapPicker> {
     );
   }
 
-  Future<PlaceDetails> getAddress(LatLng location) async {
+  Future<String> getAddress(LatLng location) async {
     try {
+
+      if (isSelectFromSuggest){
+        _placeDetails = null;
+        return _address;
+      }
       var endPoint =
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=${location?.latitude},${location?.longitude}&key=${widget.apiKey}';
       var response = jsonDecode((await http.get(endPoint,
@@ -259,7 +282,10 @@ class MapPickerState extends State<MapPicker> {
 
       PlaceDetails detail = PlaceDetails.fromJson(response['results'][0]);
 
-      return detail;
+      _placeDetails = detail;
+      _placesDetailsResponse = null;
+
+      return detail.formattedAddress;
 
     } catch (e) {
       print(e);

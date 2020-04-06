@@ -76,6 +76,8 @@ class LocationPickerState extends State<LocationPicker> {
   /// Result returned after user completes selection
   PlaceDetails placeDetails;
 
+  String address;
+
   /// Session token required for autocomplete API call
   String sessionToken = Uuid().generateV4();
 
@@ -188,7 +190,7 @@ class LocationPickerState extends State<LocationPicker> {
             aci.length = t['matched_substrings'][0]['length'];
 
             suggestions.add(RichSuggestion(aci, () {
-              decodeAndSelectPlace(aci.id);
+              decodeAndSelectPlace(aci);
             }));
           }
         }
@@ -203,12 +205,12 @@ class LocationPickerState extends State<LocationPicker> {
   /// To navigate to the selected place from the autocomplete list to the map,
   /// the lat,lng is required. This method fetches the lat,lng of the place and
   /// proceeds to moving the map to that location.
-  void decodeAndSelectPlace(String placeId) {
+  void decodeAndSelectPlace(AutoCompleteItem item) {
     clearOverlay();
 
     String endpoint =
         "https://maps.googleapis.com/maps/api/place/details/json?key=${widget.apiKey}" +
-            "&placeid=$placeId";
+            "&placeid=${item.id}";
 
     LocationUtils.getAppHeaders()
         .then((headers) => http.get(endpoint, headers: headers))
@@ -219,6 +221,9 @@ class LocationPickerState extends State<LocationPicker> {
 
         LatLng latLng = LatLng(location['lat'], location['lng']);
 
+        PlacesDetailsResponse placesDetailsResponse = _decodeDetailsResponse(response);
+        mapKey.currentState.selectSuggest(item.text, placesDetailsResponse);
+        
         moveToLocation(latLng);
       }
     }).catchError((error) {
@@ -419,7 +424,7 @@ class LocationPickerState extends State<LocationPicker> {
 /// set [automaticallyAnimateToCurrentLocation] to false.
 ///
 ///
-Future<PlaceDetails> showLocationPicker(
+Future<Map<String,dynamic>> showLocationPicker(
   BuildContext context,
   String apiKey, {
   LatLng initialCenter = const LatLng(45.521563, -122.677433),
